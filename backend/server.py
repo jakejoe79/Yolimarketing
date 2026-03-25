@@ -20,6 +20,7 @@ class CampaignRequest(BaseModel):
     dateRange: dict
     campaignType: str
     platforms: List[str]
+    campaignContext: Optional[dict] = None
 
 class ChatRequest(BaseModel):
     message: str
@@ -99,11 +100,32 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
 
 @app.post("/api/generate-campaign")
 async def generate_campaign(req: CampaignRequest):
+    # Build context from courses and events
+    context_info = ""
+    if req.campaignContext:
+        courses = req.campaignContext.get("courses", [])
+        events = req.campaignContext.get("events", [])
+        
+        if courses:
+            context_info += "\n\nCURSOS DISPONIBLES:\n"
+            for c in courses[:5]:  # Limit to 5
+                context_info += f"- {c.get('title', 'Sin título')}: {c.get('description', '')} (${c.get('price', 'N/A')})\n"
+        
+        if events:
+            context_info += "\nEVENTOS PRÓXIMOS:\n"
+            for e in events[:5]:  # Limit to 5
+                date_str = e.get('date', '')
+                context_info += f"- {e.get('title', 'Sin título')}: {e.get('description', '')} ({date_str})\n"
+
     prompt = f"""Genera un calendario de publicaciones de 7 días para redes sociales de una escuela de arte.
 Campaña: {req.campaignType}, Presupuesto: ${req.budget}, Plataformas: {', '.join(req.platforms)}
 Rango de fechas: {req.dateRange.get('start')} a {req.dateRange.get('end')}
-
-IMPORTANTE: Todo el contenido debe estar en ESPAÑOL.
+{context_info}
+IMPORTANTE: 
+- Todo el contenido debe estar en ESPAÑOL
+- Si hay cursos o eventos disponibles, menciónalos naturalmente en los captions
+- Los captions deben ser cálidos, artísticos y de 150-200 palabras
+- Incluye llamadas a la acción relevantes
 
 Devuelve SOLO JSON válido:
 {{"schedule":[{{"day":"Día 1 - Lunes","postTime":"9:00 AM","caption":"Caption cálido y artístico de 150-200 palabras EN ESPAÑOL...","hashtags":["#escueladearte","#creatividad",...8-12 hashtags relevantes]}},...7 días total]}}"""
@@ -112,7 +134,7 @@ Devuelve SOLO JSON válido:
         response = await client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido."},
+                {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido. Personaliza el contenido basándote en los cursos y eventos disponibles."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.8

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { generateCampaign } from "@/services/campaigns";
@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast, Toaster } from "sonner";
-import { Calendar as CalendarIcon, Copy, Check, Sparkles, Clock, Hash, Loader2, Instagram, Facebook, Home, ArrowLeft } from "lucide-react";
+import { Calendar as CalendarIcon, Copy, Check, Sparkles, Clock, Hash, Loader2, Instagram, Facebook, Home, ArrowLeft, BookOpen, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AdminGuide from "@/components/shared/AdminGuide";
 
@@ -90,6 +90,20 @@ export default function CampaignPage() {
   const [campaign, setCampaign] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [events, setEvents] = useState([]);
+
+  // Load courses and events from localStorage
+  useEffect(() => {
+    try {
+      const savedCourses = JSON.parse(localStorage.getItem("art-courses") || "[]");
+      const savedEvents = JSON.parse(localStorage.getItem("art-events") || "[]");
+      setCourses(savedCourses);
+      setEvents(savedEvents);
+    } catch (e) {
+      console.error("Error loading courses/events:", e);
+    }
+  }, []);
 
   const isFormValid = budget[0] >= 20 && dateRange.from && dateRange.to && campaignType && platforms.length > 0;
 
@@ -105,7 +119,8 @@ export default function CampaignPage() {
         budget: budget[0],
         dateRange: { start: format(dateRange.from, "yyyy-MM-dd"), end: format(dateRange.to, "yyyy-MM-dd") },
         campaignType: CAMPAIGN_TYPES.find(t => t.value === campaignType)?.label || campaignType,
-        platforms
+        platforms,
+        campaignContext: { courses, events }  // Include courses/events context
       });
 
       const campaignData = { ...data, timestamp: new Date().toISOString() };
@@ -119,6 +134,8 @@ export default function CampaignPage() {
       setIsLoading(false);
     }
   };
+
+  const hasContext = courses.length > 0 || events.length > 0;
 
   return (
     <div className="min-h-screen bg-[#FDFBF7]">
@@ -209,6 +226,28 @@ export default function CampaignPage() {
                   })}
                 </div>
               </div>
+
+              {/* Context Preview */}
+              {hasContext && (
+                <div className="p-3 bg-[#F5F2EA] rounded-lg">
+                  <Label className="text-[#57534E] uppercase tracking-wider text-xs font-semibold mb-2 block">Contexto Incluido</Label>
+                  <div className="space-y-1 text-sm">
+                    {courses.length > 0 && (
+                      <div className="flex items-center gap-2 text-[#1C1917]">
+                        <BookOpen className="w-4 h-4 text-[#C8553D]" />
+                        <span>{courses.length} curso{courses.length !== 1 ? 's' : ''}</span>
+                      </div>
+                    )}
+                    {events.length > 0 && (
+                      <div className="flex items-center gap-2 text-[#1C1917]">
+                        <CalendarDays className="w-4 h-4 text-[#C8553D]" />
+                        <span>{events.length} evento{events.length !== 1 ? 's' : ''}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#57534E] mt-2">La IA usará estos datos para personalizar el contenido.</p>
+                </div>
+              )}
 
               <Button onClick={handleGenerate} disabled={!isFormValid || isLoading} className="w-full bg-[#C8553D] hover:bg-[#A64530] text-white">
                 {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Campaña</>}
