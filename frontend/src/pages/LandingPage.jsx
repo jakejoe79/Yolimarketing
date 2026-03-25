@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import ChatWidget from "@/components/landing/ChatWidget";
 import EventsPreview from "@/components/landing/EventsPreview";
+import LizIntroModal from "@/components/LizIntroModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#1C1917]">
       <Toaster position="top-right" richColors />
+      <LizIntroModal />
       
       {/* Admin Link */}
       <Link 

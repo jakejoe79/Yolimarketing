@@ -130,7 +130,9 @@ export default function ChatWidget() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
               <div className="text-sm text-[#57534E] bg-white p-3 rounded-xl border border-[#E7E5DF]">
-                ¡Hola! 👋 Soy tu asistente de la escuela de arte. ¿Te gustaría información sobre nuestras clases o reservar una clase de prueba gratis?
+                ¡Hola Liz! 👋 Soy tu asistente de arte. Puedo ayudarte a explorar cursos, 
+                responder preguntas sobre clases, o simplemente platicar sobre ideas creativas. 
+                <span className="text-[#C8553D]"> ¿Qué te gustaría saber?</span>
               </div>
             )}
             {messages.map((m, i) => (
