@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
 import { toast, Toaster } from "sonner";
 import { Settings } from "lucide-react";
@@ -24,12 +25,19 @@ export default function LandingPage() {
   const [leadEmail, setLeadEmail] = useState("");
   const [leadInterest, setLeadInterest] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("art-landing-content");
       if (saved) setContent({ ...DEFAULT_CONTENT, ...JSON.parse(saved) });
     } catch {}
+
+    // Check for first visit
+    if (!localStorage.getItem('firstVisit')) {
+      localStorage.setItem('firstVisit', 'true');
+      setShowWelcomeModal(true);
+    }
   }, []);
 
   const submitLead = (e) => {
@@ -169,6 +177,33 @@ export default function LandingPage() {
           </a>
         </div>
       </footer>
+
+      {/* Welcome Modal */}
+      <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl">🎨❤️ ¡Hola Liz! ❤️🎨</DialogTitle>
+          </DialogHeader>
+          <div className="text-center space-y-4">
+            <p>¡Hola Liz! 🎨❤️</p>
+            <p>¡Sorpresa! He preparado algo especial para ti:</p>
+            
+            <div className="text-left">
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Una landing page de nuestra escuela de arte, totalmente en español.</li>
+                <li>Chat interactivo que responde en español y puede ayudarte a elegir clases o talleres. 💬</li>
+                <li>Cursos y eventos actualizados, visibles en la página y en un calendario bonito. 📅</li>
+                <li>Campañas generadas con IA que usan nuestros cursos/eventos reales. ✨</li>
+                <li>Dashboard seguro con estadísticas, leads y opción de exportar a CSV. 🔐📊</li>
+              </ul>
+            </div>
+            
+            <p className="text-sm">Todo listo para explorar y divertirte. Solo haz click, mira, y prueba el chat.</p>
+            
+            <p className="text-lg font-semibold">¡Espero que te guste y disfrutes tu regalo sorpresa! 🎁🎨💖</p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ChatWidget />
     </div>

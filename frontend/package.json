@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://tu-dominio.com",
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
@@ -42,7 +43,7 @@
     "lucide-react": "^0.507.0",
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
-    "react-day-picker": "8.10.1",
+    "react-day-picker": "^9.14.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.2",
     "react-resizable-panels": "^3.0.1",

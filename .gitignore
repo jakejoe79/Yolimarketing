@@ -19,6 +19,11 @@ node_modules/
 # Testing
 /coverage
 
+# Environment variables
+.env
+backend/.env
+frontend/.env.local
+
 # Next.js
 /.next/
 /out/

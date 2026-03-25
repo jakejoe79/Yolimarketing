@@ -11,7 +11,8 @@ from openai import AsyncOpenAI
 load_dotenv(Path(__file__).parent / '.env')
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
 
 client = AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
 
