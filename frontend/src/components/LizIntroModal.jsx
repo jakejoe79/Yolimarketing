@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Heart, Palette, Calendar, MessageCircle } from "lucide-react";
+import { Sparkles, Heart, Palette, Calendar, MessageCircle, Facebook } from "lucide-react";
 
 export default function LizIntroModal() {
   const [open, setOpen] = useState(false);
@@ -16,10 +16,10 @@ export default function LizIntroModal() {
   };
 
   const features = [
-    { icon: Palette, title: "Cursos y Eventos", desc: "Podemos agregar nuestros propios cursos, talleres y eventos especiales." },
-    { icon: MessageCircle, title: "Chat Inteligente", desc: "Un asistente de IA que responde preguntas y captura leads automáticamente." },
-    { icon: Sparkles, title: "Campañas con IA", desc: "Genera 7 días de contenido para redes sociales basado en nuestros cursos." },
-    { icon: Calendar, title: "Calendario", desc: "Ve todos los eventos próximos de un vistazo." },
+    { icon: Palette, title: "Cursos y Talleres", desc: "Agrega tus clases de arte, talleres de pintura y eventos especiales." },
+    { icon: MessageCircle, title: "Chat con IA", desc: "Un asistente que responde preguntas sobre tus clases y captura interesados." },
+    { icon: Sparkles, title: "Campañas Automáticas", desc: "Genera contenido para Facebook e Instagram basado en tus cursos." },
+    { icon: Calendar, title: "Calendario de Eventos", desc: "Organiza y muestra tus próximos talleres y exposiciones." },
   ];
 
   if (!open) return null;
@@ -44,27 +44,27 @@ export default function LizIntroModal() {
               </h2>
               <div className="flex items-center justify-center gap-2 mb-6">
                 <Heart className="w-5 h-5 text-[#C8553D] fill-[#C8553D]" />
-                <span className="text-[#C8553D] font-medium">Una sorpresa para ti</span>
+                <span className="text-[#C8553D] font-medium">Un regalo especial para ti</span>
                 <Heart className="w-5 h-5 text-[#C8553D] fill-[#C8553D]" />
               </div>
               
               <p className="text-[#57534E] mb-6 text-lg leading-relaxed">
-                ¡Bienvenida a nuestra app de escuela de arte! La creé pensando en 
-                <span className="text-[#C8553D] font-semibold"> nosotros</span> y todo lo que 
-                podemos hacer juntos.
+                ¡Bienvenida a la app de tu escuela de arte! La creé pensando en 
+                <span className="text-[#C8553D] font-semibold"> nosotros</span> y en todo lo que 
+                podemos lograr juntos con tu talento.
               </p>
               
               <p className="text-[#57534E] mb-8">
-                Aquí podemos agregar nuestros cursos, ver eventos, chatear con un asistente 
-                de IA y hasta generar campañas de marketing automáticamente. 
-                <span className="text-[#C8553D]"> ¡Todo personalizado!</span>
+                Aquí puedes administrar tus cursos, ver quién está interesado, 
+                chatear con visitantes automáticamente, y crear campañas de marketing 
+                para <span className="text-[#C8553D]">Facebook e Instagram</span> en segundos.
               </p>
 
               <button
                 onClick={() => setStep(1)}
                 className="bg-[#C8553D] hover:bg-[#A64530] text-white px-8 py-3 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg"
               >
-                Ver qué puede hacer ✨
+                Descubre qué puede hacer ✨
               </button>
             </div>
           </>
@@ -76,10 +76,10 @@ export default function LizIntroModal() {
                 className="text-2xl mb-6 font-bold text-[#1C1917]"
                 style={{ fontFamily: "Playfair Display, serif" }}
               >
-                Lo que podemos hacer juntos
+                Tu nueva herramienta de marketing
               </h3>
               
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 {features.map((feature, i) => {
                   const Icon = feature.icon;
                   return (
@@ -95,16 +95,26 @@ export default function LizIntroModal() {
                 })}
               </div>
 
+              <a 
+                href="https://www.facebook.com/profile.php?id=61550732505863"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-[#57534E] hover:text-[#C8553D] mb-6"
+              >
+                <Facebook className="w-4 h-4" />
+                Conectado con tu página de Facebook
+              </a>
+
               <p className="text-[#57534E] mb-6 text-sm">
-                💡 <strong>Tip:</strong> Haz clic en el botón de chat (esquina inferior derecha) 
-                para probar el asistente de IA. ¡Ya sabe sobre arte!
+                💡 <strong>Tip:</strong> Empieza agregando tus cursos en el Panel de Control. 
+                Luego el generador de campañas los usará automáticamente.
               </p>
 
               <button
                 onClick={closeModal}
                 className="bg-[#C8553D] hover:bg-[#A64530] text-white px-8 py-3 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg"
               >
-                ¡Vamos a explorar! 🎨
+                ¡Empecemos! 🎨
               </button>
             </div>
           </>
