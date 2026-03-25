@@ -59,7 +59,16 @@
 ## 🎁 ¡Listo para Liz!
 - [ ] Envía el link de producción
 - [ ] Confirma que todo funciona en su navegador
-- [ ] ¡Sorpresa perfecta! ❤️
+
+### 💖 Mientras Liz lo ve (notas divertidas)
+- [ ] 😍 Modal personalizado aparece: "¡Bienvenida Liz! Tu escuela de arte te espera"
+- [ ] 💬 Chat responde en español con entusiasmo
+- [ ] 📅 Cursos como "Taller de Fin de Semana" listos
+- [ ] 🎨 Campañas generadas con IA para redes sociales
+- [ ] 🔐 Dashboard protegido, pero fácil de usar
+- [ ] 📊 Export CSV de leads para sus contactos
+- [ ] ✨ Todo fluye sin bugs ni delays
+- [ ] ¡Sorpresa perfecta! ❤️🎨
 
 ---
 
