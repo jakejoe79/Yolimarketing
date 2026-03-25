@@ -1,8 +1,9 @@
 import { apiFetch } from "./api";
 
-export function sendChatMessage(message, history = []) {
+export function sendChatMessage(payload) {
+  // payload: { message, history, campaignContext }
   return apiFetch("/api/chat", {
     method: "POST",
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify(payload),
   });
 }
