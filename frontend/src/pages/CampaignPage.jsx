@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast, Toaster } from "sonner";
 import { Calendar as CalendarIcon, Copy, Check, Sparkles, Clock, Hash, Loader2, Instagram, Facebook, Home, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AdminGuide from "@/components/shared/AdminGuide";
 
 const CAMPAIGN_TYPES = [
   { value: "weekend-workshop", label: "Taller de Fin de Semana" },
@@ -255,6 +256,7 @@ export default function CampaignPage() {
           </div>
         </div>
       </main>
+      <AdminGuide />
     </div>
   );
 }

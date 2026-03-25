@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Users, Megaphone, Calendar, Edit, Home } from "lucide-react";
+import AdminGuide from "@/components/shared/AdminGuide";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -143,6 +144,7 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+      <AdminGuide />
     </div>
   );
 }
