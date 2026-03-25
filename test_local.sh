@@ -1,45 +1,41 @@
 #!/bin/bash
 
-# 🧪 Script de Prueba Local - Yolimarketing 🎨
-# Simula el entorno de producción localmente con Docker
-# Uso: ./test_local.sh
+# test_local.sh
+# Script para levantar todo localmente como en producción
+# ✅ Requiere .env con OPENAI_API_KEY y demás variables
 
-set -e
+echo "🚀 Iniciando prueba local del MVP para Liz..."
 
-echo "🎨 Yolimarketing - Prueba Local como Producción..."
-
-# Verificar que .env existe y tiene OPENAI_API_KEY
-if [ ! -f backend/.env ] || ! grep -q "OPENAI_API_KEY=sk-" backend/.env; then
-    echo "❌ ERROR: backend/.env no existe o no tiene OPENAI_API_KEY válida"
-    echo "   Copia backend/.env.example a .env y agrega tu clave real"
-    exit 1
+# Verificar variable de entorno
+if [ -z "$OPENAI_API_KEY" ]; then
+  echo "❌ ERROR: OPENAI_API_KEY no está definido en .env"
+  echo "Por favor, agrégalo antes de continuar."
+  exit 1
 fi
 
-# Verificar docker-compose.yml
-if [ ! -f docker-compose.yml ]; then
-    echo "❌ ERROR: docker-compose.yml no encontrado"
-    exit 1
-fi
-
-echo "🐳 Levantando servicios con Docker Compose..."
+# Construir y levantar contenedores
+echo "🔧 Construyendo y levantando backend y frontend..."
 docker-compose up --build -d
 
-echo "⏳ Esperando que los servicios inicien (30s)..."
-sleep 30
+# Esperar unos segundos a que los servicios estén activos
+echo "⏳ Esperando 10 segundos para que backend y frontend inicien..."
+sleep 10
 
-echo "✅ Servicios listos!"
+# Mostrar URLs locales
+echo "🌐 Frontend local: http://localhost:3000"
+echo "🌐 Backend local: http://localhost:8000"
+
+# Checklist de pruebas
 echo ""
-echo "🌐 URLs locales:"
-echo "   Frontend: http://localhost:3000"
-echo "   Backend:  http://localhost:8000"
+echo "📋 Checklist de pruebas:"
+echo "1️⃣ Landing → Modal de bienvenida personalizado para Liz"
+echo "2️⃣ Chat → Mensajes en español, verificar localStorage['art-chat']"
+echo "3️⃣ Dashboard → Leads, cursos/eventos, campañas reflejadas"
+echo "4️⃣ Generador de campañas → Usa art-courses y art-events"
+echo "5️⃣ Rutas protegidas → /dashboard y /campaigns requieren login"
+echo "6️⃣ Exportación CSV de leads (opcional)"
 echo ""
-echo "🧪 Pruebas a realizar:"
-echo "   1. Abre http://localhost:3000 → ¿Aparece modal de Liz?"
-echo "   2. Prueba chat en español → ¿Guarda en localStorage?"
-echo "   3. Ve a /login → ¿Dashboard funciona?"
-echo "   4. Crea curso/evento → ¿Se refleja en landing?"
-echo "   5. Genera campaña → ¿Usa contexto de cursos?"
+echo "✅ Cuando termines, puedes detener todo con:"
+echo "docker-compose down"
 echo ""
-echo "🛑 Para detener: docker-compose down"
-echo ""
-echo "🎁 ¡Si todo funciona, está listo para producción!"
+echo "🎨 ¡Todo listo para probar el MVP local antes de enviar el regalo a Liz!"

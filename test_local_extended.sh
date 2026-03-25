@@ -14,8 +14,8 @@ NC='\033[0m' # No Color
 echo "🚀 Iniciando prueba local EXTENDIDA del MVP para Liz..."
 
 # Verificar variable de entorno
-if [ -z "$OPENAI_API_KEY" ]; then
-  echo -e "${RED}❌ ERROR: OPENAI_API_KEY no está definido en .env${NC}"
+if [ ! -f backend/.env ] || ! grep -q "OPENAI_API_KEY=sk-" backend/.env; then
+  echo -e "${RED}❌ ERROR: backend/.env no existe o no tiene OPENAI_API_KEY válida${NC}"
   echo "Por favor, agrégalo antes de continuar."
   exit 1
 fi
