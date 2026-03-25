@@ -21,6 +21,39 @@ class CampaignRequest(BaseModel):
     campaignType: str
     platforms: List[str]
 
+class ChatRequest(BaseModel):
+    message: str
+    history: List[dict] = []
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest):
+    messages = [
+        {"role": "system", "content": """Eres un asistente amable para una escuela de arte. 
+Ayudas a los visitantes con información sobre clases, talleres y programas.
+Responde siempre en español, de forma cálida y entusiasta.
+Si preguntan por precios o horarios específicos, invítalos a dejar sus datos en el formulario de contacto."""}
+    ]
+    
+    # Add history
+    for msg in req.history[-10:]:  # Last 10 messages
+        role = "user" if msg.get("sender") == "user" else "assistant"
+        messages.append({"role": role, "content": msg.get("text", "")})
+    
+    # Add current message
+    messages.append({"role": "user", "content": req.message})
+    
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            temperature=0.7,
+            max_tokens=300
+        )
+        reply = response.choices[0].message.content.strip()
+        return {"reply": reply, "action": "response"}
+    except Exception as e:
+        return {"reply": "Lo siento, hubo un error. Por favor intenta de nuevo.", "action": "error"}
+
 @app.post("/api/generate-campaign")
 async def generate_campaign(req: CampaignRequest):
     prompt = f"""Genera un calendario de publicaciones de 7 días para redes sociales de una escuela de arte.

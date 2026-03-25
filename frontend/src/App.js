@@ -12,15 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ChatWidget } from "@/components/ChatWidget";
+import { useEditableContent, EditableText, EditModeToggle } from "@/hooks/useEditableContent";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
-
-const CAMPAIGN_TYPES = [
-  { value: "weekend-workshop", label: "Taller de Fin de Semana" },
-  { value: "free-trial", label: "Clase de Prueba Gratis" },
-  { value: "seasonal-intensive", label: "Intensivo de Temporada" },
-  { value: "open-studio", label: "Estudio Abierto" },
-];
 
 const PLATFORMS = [
   { id: "instagram", label: "Instagram", icon: Instagram },
@@ -125,17 +120,31 @@ const DayCard = ({ day, index }) => {
 };
 
 // Empty state component
-const EmptyState = () => (
+const EmptyState = ({ content, isEditMode, updateContent }) => (
   <div className="empty-state">
     <img src={EMPTY_STATE_IMAGE} alt="Arte abstracto" className="shadow-lg" />
-    <h2 className="font-display text-3xl font-bold text-[#1C1917] mb-3">Tu lienzo te espera</h2>
-    <p className="text-[#57534E] text-lg max-w-md mx-auto">
-      Crea tu primera campaña para ver un hermoso calendario de 7 días diseñado especialmente para tu escuela de arte.
-    </p>
+    <h2 className="font-display text-3xl font-bold text-[#1C1917] mb-3">
+      <EditableText 
+        value={content.emptyState.title} 
+        onChange={(v) => updateContent("emptyState", "title", v)}
+        isEditMode={isEditMode}
+        className="font-display text-3xl font-bold text-[#1C1917]"
+      />
+    </h2>
+    <div className="text-[#57534E] text-lg max-w-md mx-auto">
+      <EditableText 
+        value={content.emptyState.description} 
+        onChange={(v) => updateContent("emptyState", "description", v)}
+        isEditMode={isEditMode}
+        className="text-[#57534E] text-lg"
+        multiline
+      />
+    </div>
   </div>
 );
 
 function App() {
+  const { content, updateContent, resetContent, isEditMode, setIsEditMode } = useEditableContent();
   const [budget, setBudget] = useState([100]);
   const [dateRange, setDateRange] = useState({ from: null, to: null });
   const [campaignType, setCampaignType] = useState("");
@@ -178,7 +187,7 @@ function App() {
         body: JSON.stringify({
           budget: budget[0],
           dateRange: { start: format(dateRange.from, "yyyy-MM-dd"), end: format(dateRange.to, "yyyy-MM-dd") },
-          campaignType: CAMPAIGN_TYPES.find(t => t.value === campaignType)?.label || campaignType,
+          campaignType: content.campaignTypes.find(t => t.value === campaignType)?.label || campaignType,
           platforms
         })
       });
@@ -220,12 +229,28 @@ function App() {
   return (
     <div className="app-container min-h-screen font-body">
       <Toaster position="top-right" richColors />
+      <ChatWidget />
+      <EditModeToggle isEditMode={isEditMode} setIsEditMode={setIsEditMode} onReset={resetContent} />
       
       <div className="grid grid-cols-1 md:grid-cols-12">
         <aside className="sidebar md:col-span-4 lg:col-span-3 p-8 md:h-screen md:sticky md:top-0 md:overflow-y-auto" data-testid="campaign-sidebar">
           <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-[#1C1917] tracking-tight mb-2">Planificador de Campañas</h1>
-            <p className="text-[#57534E]">Crea la magia del marketing de tu escuela de arte</p>
+            <h1 className="font-display text-3xl font-bold text-[#1C1917] tracking-tight mb-2">
+              <EditableText 
+                value={content.hero.title} 
+                onChange={(v) => updateContent("hero", "title", v)}
+                isEditMode={isEditMode}
+                className="font-display text-3xl font-bold text-[#1C1917] tracking-tight"
+              />
+            </h1>
+            <div className="text-[#57534E]">
+              <EditableText 
+                value={content.hero.subtitle} 
+                onChange={(v) => updateContent("hero", "subtitle", v)}
+                isEditMode={isEditMode}
+                className="text-[#57534E]"
+              />
+            </div>
           </div>
 
           <div className="space-y-8">
@@ -277,7 +302,7 @@ function App() {
                   <SelectValue placeholder="Selecciona tipo de campaña" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-[#E7E5DF]">
-                  {CAMPAIGN_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  {content.campaignTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -317,15 +342,29 @@ function App() {
               <div className="space-y-6">{campaign.schedule.map((day, i) => <DayCard key={i} day={day} index={i} />)}</div>
             </div>
           )}
-          {!isLoading && !campaign && !error && <EmptyState />}
+          {!isLoading && !campaign && !error && <EmptyState content={content} isEditMode={isEditMode} updateContent={updateContent} />}
         </main>
       </div>
 
       <section className="lead-section py-16 md:py-20 px-8" data-testid="lead-capture-section">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1C1917] mb-4">¿Te interesan nuestras clases?</h2>
-          <p className="text-[#57534E] text-lg mb-10">Déjanos tus datos y te contactaremos con más información.</p>
-          {leadSuccess && <div className="success-message mb-6" data-testid="lead-success">¡Gracias! Nos pondremos en contacto pronto.</div>}
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1C1917] mb-4">
+            <EditableText 
+              value={content.leadSection.title} 
+              onChange={(v) => updateContent("leadSection", "title", v)}
+              isEditMode={isEditMode}
+              className="font-display text-3xl md:text-4xl font-bold text-[#1C1917]"
+            />
+          </h2>
+          <div className="text-[#57534E] text-lg mb-10">
+            <EditableText 
+              value={content.leadSection.description} 
+              onChange={(v) => updateContent("leadSection", "description", v)}
+              isEditMode={isEditMode}
+              className="text-[#57534E] text-lg"
+            />
+          </div>
+          {leadSuccess && <div className="success-message mb-6" data-testid="lead-success">{content.leadSection.successMessage}</div>}
           <form onSubmit={submitLead} className="space-y-6 text-left">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -341,12 +380,12 @@ function App() {
               <Label className="label-overline">Clase de Interés</Label>
               <Select value={leadInterest} onValueChange={setLeadInterest}>
                 <SelectTrigger className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-interest-select"><SelectValue placeholder="¿Qué te interesa?" /></SelectTrigger>
-                <SelectContent className="bg-white border-[#E7E5DF]">{CAMPAIGN_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                <SelectContent className="bg-white border-[#E7E5DF]">{content.campaignTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="text-center pt-4">
               <Button type="submit" disabled={leadSubmitting} className="px-12 bg-[#C8553D] hover:bg-[#A64530] text-white" data-testid="lead-submit-btn">
-                {leadSubmitting ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Enviando...</> : "Contáctanos"}
+                {leadSubmitting ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Enviando...</> : content.leadSection.buttonText}
               </Button>
             </div>
           </form>
