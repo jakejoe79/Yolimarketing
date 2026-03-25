@@ -1,10 +1,37 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Users, Megaphone, Calendar, Edit, Home } from "lucide-react";
+import { LogOut, Users, Megaphone, Calendar, Edit, Home, Download } from "lucide-react";
 import AdminGuide from "@/components/shared/AdminGuide";
 import CoursesEventsManager from "@/components/dashboard/CoursesEventsManager";
 import CalendarView from "@/components/dashboard/CalendarView";
+
+// CSV Export utility
+const exportLeadsToCSV = (leads) => {
+  if (leads.length === 0) return;
+  
+  const headers = ["Nombre", "Email", "Interés", "Fuente", "Fecha"];
+  const rows = leads.map(lead => [
+    lead.name || "",
+    lead.email || "",
+    lead.interest || "",
+    lead.source || "formulario",
+    lead.timestamp ? new Date(lead.timestamp).toLocaleDateString("es-ES") : ""
+  ]);
+  
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+  ].join("\n");
+  
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `leads_${new Date().toISOString().split("T")[0]}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -132,9 +159,22 @@ export default function DashboardPage() {
 
         {/* Recent Leads */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E7E5DF]">
-          <h2 className="text-xl font-bold text-[#1C1917] mb-4" style={{ fontFamily: "Playfair Display, serif" }}>
-            Leads Recientes
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-[#1C1917]" style={{ fontFamily: "Playfair Display, serif" }}>
+              Leads Recientes
+            </h2>
+            {leads.length > 0 && (
+              <Button
+                onClick={() => exportLeadsToCSV(leads)}
+                variant="outline"
+                size="sm"
+                className="border-[#C8553D] text-[#C8553D] hover:bg-[#C8553D] hover:text-white"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar CSV
+              </Button>
+            )}
+          </div>
           {leads.length === 0 ? (
             <p className="text-[#57534E]">Aún no hay leads registrados.</p>
           ) : (
