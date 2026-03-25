@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8001";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 export async function apiFetch(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
