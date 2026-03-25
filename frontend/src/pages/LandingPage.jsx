@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import ChatWidget from "@/components/landing/ChatWidget";
+import EventsPreview from "@/components/landing/EventsPreview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,18 +81,8 @@ export default function LandingPage() {
         </p>
       </section>
 
-      {/* Classes Section */}
-      <section className="max-w-5xl mx-auto px-6 pb-16">
-        <h2 
-          className="text-2xl md:text-3xl mb-6 font-bold"
-          style={{ fontFamily: "Playfair Display, serif" }}
-        >
-          Próximas clases y eventos
-        </h2>
-        <div className="bg-white rounded-xl p-8 shadow-sm border border-[#E7E5DF]">
-          <p className="text-[#57534E]">Aún no hay clases o eventos publicados.</p>
-        </div>
-      </section>
+      {/* Courses & Events Preview */}
+      <EventsPreview />
 
       {/* Lead Capture Section */}
       <section className="bg-[#F5F2EA] py-16 md:py-20 px-6">

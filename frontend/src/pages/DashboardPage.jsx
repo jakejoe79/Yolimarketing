@@ -3,18 +3,33 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Users, Megaphone, Calendar, Edit, Home } from "lucide-react";
 import AdminGuide from "@/components/shared/AdminGuide";
+import CoursesEventsManager from "@/components/dashboard/CoursesEventsManager";
+import CalendarView from "@/components/dashboard/CalendarView";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     try {
       setLeads(JSON.parse(localStorage.getItem("art-leads") || "[]"));
+      setCourses(JSON.parse(localStorage.getItem("art-courses") || "[]"));
+      setEvents(JSON.parse(localStorage.getItem("art-events") || "[]"));
       const savedCampaign = localStorage.getItem("art-campaigns");
       if (savedCampaign) setCampaigns([JSON.parse(savedCampaign)]);
     } catch {}
+
+    // Refresh data when localStorage changes
+    const interval = setInterval(() => {
+      try {
+        setCourses(JSON.parse(localStorage.getItem("art-courses") || "[]"));
+        setEvents(JSON.parse(localStorage.getItem("art-events") || "[]"));
+      } catch {}
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -78,10 +93,16 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-[#57534E]">Eventos</p>
-                <p className="text-3xl font-bold text-[#1C1917]">0</p>
+                <p className="text-3xl font-bold text-[#1C1917]">{events.length}</p>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Courses/Events Manager + Calendar */}
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
+          <CoursesEventsManager />
+          <CalendarView />
         </div>
 
         {/* Quick Actions */}
