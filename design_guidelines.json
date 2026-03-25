@@ -1,0 +1,85 @@
+{
+  "theme": "light",
+  "archetype": "ORGANIC & EARTHY",
+  "aesthetics": "Warm, creative, slightly imperfect. Focus on a tactile, 'art school' sketchbook feel with high-end editorial typography.",
+  "colors": {
+    "background_main": "#FDFBF7",
+    "background_secondary": "#F5F2EA",
+    "surface": "#FFFFFF",
+    "primary_accent": "#C8553D",
+    "primary_hover": "#A64530",
+    "text_main": "#1C1917",
+    "text_muted": "#57534E",
+    "border_subtle": "#E7E5DF",
+    "state_error": "#B91C1C",
+    "state_success": "#15803D"
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Playfair Display",
+      "body": "Inter"
+    },
+    "rules": {
+      "headings": "font-bold or font-black, tracking-tight, leading-none. Large sizes for emotional impact.",
+      "body": "font-normal, leading-relaxed, tracking-normal.",
+      "labels_and_overlines": "uppercase, tracking-[0.2em], text-xs, font-semibold, text-[#57534E]"
+    }
+  },
+  "grids_and_layouts": {
+    "structure": "12-column Bento-inspired split. Mobile-first (1 col), tablet/desktop (12 cols).",
+    "sidebar_left": "col-span-full md:col-span-4. Acts as the control panel. Fixed or sticky height `h-screen` on desktop with internal scrolling. Generous padding `p-8`. Right border 1px solid `border_subtle`.",
+    "main_panel": "col-span-full md:col-span-8. Scrollable 7-day timeline. Spacing `gap-8`, padding `p-8` or `p-12`.",
+    "bottom_section": "col-span-full. Distinct background (`background_secondary`) to separate lead capture from the app flow. Massive padding `py-20` to signal a new context."
+  },
+  "surfaces_and_micro_themes": {
+    "cards_timeline": "Flat white background (`#FFFFFF`) with 1px subtle border (`border-[#E7E5DF]`). NO heavy drop shadows. Hover: Slight lift (`-translate-y-1`), subtle ambient shadow, border color darkens slightly.",
+    "buttons_primary": "Pill-shaped or rounded-lg. Solid terracotta (`bg-[#C8553D]`) with white text. Micro-interaction: `active:scale-95 transition-transform hover:bg-[#A64530]`.",
+    "inputs_and_forms": "1px solid border, `bg-white`. Focus state: `focus:ring-2 focus:ring-[#C8553D]/30 focus:border-[#C8553D]`. Use Shadcn components heavily customized to remove the 'Vercel default' look.",
+    "empty_state": "Central aligned, warm abstract art image, playful but elegant text. Use soft opacity."
+  },
+  "motion": {
+    "timeline_entrance": "Staggered fade-up for each day card in the 7-day schedule.",
+    "loading_state": "Pulsing skeleton for AI generation. Use a warm terracotta-to-cream shimmer instead of standard gray `animate-pulse`.",
+    "hover_effects": "All interactive elements must have a transition (`transition-all duration-300 ease-out`)."
+  },
+  "components": {
+    "inputs": "Shadcn form components. Dropdown/Select must use Shadcn Select. Slider must use Shadcn Slider. Customize padding and border colors to match earthy theme.",
+    "timeline_day": "A custom card component per day. Should feature a vertical connecting line/node visual on the left. Content includes 'Suggest Time', 'Caption', 'Hashtags', and 'Copy' button. Use 'lucide-react' for icons."
+  },
+  "media": {
+    "empty_state_image": {
+      "url": "https://images.unsplash.com/photo-1741335661631-439871f2b3b6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFydCUyMHdhcm18ZW58MHx8fHwxNzc0NDIxOTgxfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Abstract painting with geometric shapes and muted colors. Display elegantly in the Main Panel when no campaign is generated."
+    },
+    "header_accent_image": {
+      "url": "https://images.pexels.com/photos/1787243/pexels-photo-1787243.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Dynamic abstract expressionism artwork featuring bold red and orange acrylic strokes. Can be used as a subtle, low-opacity background texture or banner accent."
+    }
+  },
+  "accessibility_and_testing": {
+    "contrast": "Ensure text over terracotta is pure white. Muted text should be `#57534E` on cream to meet 4.5:1 ratio.",
+    "testing_attributes": "MUST include `data-testid` on ALL interactive elements (inputs, buttons, select, slider, day-cards, copy-buttons, lead-capture-form). Format: kebab-case, role-based."
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette to achieve the 'warm, creative, slightly imperfect' aesthetic requested by the user.",
+    "Do not use generic gray or blue defaults. Everything must feel like an art studio planner.",
+    "Use standard HTML + Tailwind for layout. Use Shadcn for the Slider, Select, DatePicker, and Form elements.",
+    "For the timeline, use a vertical connecting line with nodes/dots on the left, and the content cards on the right. Give the cards a subtle tactile border and soft hover effect.",
+    "The AI loading state should be visually pleasing. Instead of standard gray bars, use a skeleton with `bg-[#F5F2EA]` and an `after:` element with a sweeping `bg-gradient-to-r` from transparent to `#E7E5DF` to transparent.",
+    "Include 'lucide-react' icons for the Copy buttons, Calendar, Sliders, etc.",
+    "Add functional localStorage logic to save the lead capture form data.",
+    "Use Framer Motion or native CSS transitions for the timeline staggered entrance.",
+    "Do not center-align the app container. Align text to the left for readability, using the grid layout for structure."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Every interaction needs micro-animations - hover states, transitions. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, custom cursors, selection states separate good from extraordinary.",
+    "MUST NOT apply universal transition (e.g., `transition: all`). Add transitions for specific interactive elements.",
+    "MUST NOT center align the app container in CSS.",
+    "Prioritize using pre-existing components from src/components/ui. Create new ones matching existing patterns.",
+    "Components MUST use named exports. Pages MUST use default exports.",
+    "Use `sonner` for toasts."
+  ]
+}
