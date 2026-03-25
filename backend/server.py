@@ -23,18 +23,20 @@ class CampaignRequest(BaseModel):
 
 @app.post("/api/generate-campaign")
 async def generate_campaign(req: CampaignRequest):
-    prompt = f"""Generate a 7-day social media posting schedule for an art school campaign.
-Campaign: {req.campaignType}, Budget: ${req.budget}, Platforms: {', '.join(req.platforms)}
-Date range: {req.dateRange.get('start')} to {req.dateRange.get('end')}
+    prompt = f"""Genera un calendario de publicaciones de 7 días para redes sociales de una escuela de arte.
+Campaña: {req.campaignType}, Presupuesto: ${req.budget}, Plataformas: {', '.join(req.platforms)}
+Rango de fechas: {req.dateRange.get('start')} a {req.dateRange.get('end')}
 
-Return ONLY valid JSON:
-{{"schedule":[{{"day":"Day 1 - Monday","postTime":"9:00 AM","caption":"150-200 word warm art-focused caption...","hashtags":["#artschool","#creativity",...8-12 tags]}},...7 days total]}}"""
+IMPORTANTE: Todo el contenido debe estar en ESPAÑOL.
+
+Devuelve SOLO JSON válido:
+{{"schedule":[{{"day":"Día 1 - Lunes","postTime":"9:00 AM","caption":"Caption cálido y artístico de 150-200 palabras EN ESPAÑOL...","hashtags":["#escueladearte","#creatividad",...8-12 hashtags relevantes]}},...7 días total]}}"""
 
     try:
         response = await client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are an art school social media expert. Return only valid JSON."},
+                {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.8

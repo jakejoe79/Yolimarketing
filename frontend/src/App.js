@@ -16,10 +16,10 @@ import { cn } from "@/lib/utils";
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const CAMPAIGN_TYPES = [
-  { value: "weekend-workshop", label: "Weekend Workshop" },
-  { value: "free-trial", label: "Free Trial Class" },
-  { value: "seasonal-intensive", label: "Seasonal Intensive" },
-  { value: "open-studio", label: "Open Studio" },
+  { value: "weekend-workshop", label: "Taller de Fin de Semana" },
+  { value: "free-trial", label: "Clase de Prueba Gratis" },
+  { value: "seasonal-intensive", label: "Intensivo de Temporada" },
+  { value: "open-studio", label: "Estudio Abierto" },
 ];
 
 const PLATFORMS = [
@@ -68,10 +68,10 @@ const DayCard = ({ day, index }) => {
     const text = `${day.caption}\n\n${day.hashtags.map(tag => tag.startsWith('#') ? tag : `#${tag}`).join(' ')}`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
-      toast.success("Copied to clipboard!");
+      toast.success("¡Copiado al portapapeles!");
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
-      toast.error("Failed to copy");
+      toast.error("Error al copiar");
     });
   }, [day]);
 
@@ -117,7 +117,7 @@ const DayCard = ({ day, index }) => {
           data-testid={`copy-btn-day-${index + 1}`}
         >
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          {copied ? "Copied!" : "Copy to clipboard"}
+          {copied ? "¡Copiado!" : "Copiar al portapapeles"}
         </button>
       </div>
     </div>
@@ -127,10 +127,10 @@ const DayCard = ({ day, index }) => {
 // Empty state component
 const EmptyState = () => (
   <div className="empty-state">
-    <img src={EMPTY_STATE_IMAGE} alt="Abstract art" className="shadow-lg" />
-    <h2 className="font-display text-3xl font-bold text-[#1C1917] mb-3">Your canvas awaits</h2>
+    <img src={EMPTY_STATE_IMAGE} alt="Arte abstracto" className="shadow-lg" />
+    <h2 className="font-display text-3xl font-bold text-[#1C1917] mb-3">Tu lienzo te espera</h2>
     <p className="text-[#57534E] text-lg max-w-md mx-auto">
-      Create your first campaign to see a beautiful 7-day posting schedule crafted just for your art school.
+      Crea tu primera campaña para ver un hermoso calendario de 7 días diseñado especialmente para tu escuela de arte.
     </p>
   </div>
 );
@@ -190,7 +190,7 @@ function App() {
       
       try { localStorage.setItem("art-campaigns", JSON.stringify(campaignData)); } catch {}
       setCampaign(campaignData);
-      toast.success("Campaign generated!");
+      toast.success("¡Campaña generada!");
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
@@ -201,8 +201,8 @@ function App() {
 
   const submitLead = (e) => {
     e.preventDefault();
-    if (!leadName.trim() || !leadEmail.trim() || !leadInterest) { toast.error("Please fill in all fields"); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadEmail)) { toast.error("Invalid email"); return; }
+    if (!leadName.trim() || !leadEmail.trim() || !leadInterest) { toast.error("Por favor completa todos los campos"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadEmail)) { toast.error("Correo inválido"); return; }
 
     setLeadSubmitting(true);
     try {
@@ -211,9 +211,9 @@ function App() {
       localStorage.setItem("art-leads", JSON.stringify(leads));
       setLeadSuccess(true);
       setLeadName(""); setLeadEmail(""); setLeadInterest("");
-      toast.success("Thank you! We'll be in touch.");
+      toast.success("¡Gracias! Nos pondremos en contacto pronto.");
       setTimeout(() => setLeadSuccess(false), 3000);
-    } catch { toast.error("Failed to submit"); }
+    } catch { toast.error("Error al enviar"); }
     finally { setLeadSubmitting(false); }
   };
 
@@ -224,13 +224,13 @@ function App() {
       <div className="grid grid-cols-1 md:grid-cols-12">
         <aside className="sidebar md:col-span-4 lg:col-span-3 p-8 md:h-screen md:sticky md:top-0 md:overflow-y-auto" data-testid="campaign-sidebar">
           <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-[#1C1917] tracking-tight mb-2">Campaign Planner</h1>
-            <p className="text-[#57534E]">Create your art school's marketing magic</p>
+            <h1 className="font-display text-3xl font-bold text-[#1C1917] tracking-tight mb-2">Planificador de Campañas</h1>
+            <p className="text-[#57534E]">Crea la magia del marketing de tu escuela de arte</p>
           </div>
 
           <div className="space-y-8">
             <div>
-              <Label className="label-overline">Budget</Label>
+              <Label className="label-overline">Presupuesto</Label>
               <div className="mt-3 px-1">
                 <Slider value={budget} onValueChange={setBudget} min={20} max={500} step={10} data-testid="budget-slider" />
                 <div className="flex justify-between mt-2 text-sm text-[#57534E]">
@@ -242,13 +242,13 @@ function App() {
             </div>
 
             <div>
-              <Label className="label-overline">Campaign Dates</Label>
+              <Label className="label-overline">Fechas de Campaña</Label>
               <div className="grid grid-cols-2 gap-3 mt-3">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className={cn("justify-start text-left font-normal border-[#E7E5DF] bg-white hover:bg-[#F5F2EA] hover:border-[#C8553D]", !dateRange.from && "text-[#57534E]")} data-testid="date-start-picker">
                       <CalendarIcon className="mr-2 h-4 w-4 text-[#C8553D]" />
-                      {dateRange.from ? format(dateRange.from, "MMM d") : "Start"}
+                      {dateRange.from ? format(dateRange.from, "d MMM") : "Inicio"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-white border-[#E7E5DF]" align="start">
@@ -260,7 +260,7 @@ function App() {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className={cn("justify-start text-left font-normal border-[#E7E5DF] bg-white hover:bg-[#F5F2EA] hover:border-[#C8553D]", !dateRange.to && "text-[#57534E]")} data-testid="date-end-picker">
                       <CalendarIcon className="mr-2 h-4 w-4 text-[#C8553D]" />
-                      {dateRange.to ? format(dateRange.to, "MMM d") : "End"}
+                      {dateRange.to ? format(dateRange.to, "d MMM") : "Fin"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-white border-[#E7E5DF]" align="start">
@@ -271,10 +271,10 @@ function App() {
             </div>
 
             <div>
-              <Label className="label-overline">Campaign Type</Label>
+              <Label className="label-overline">Tipo de Campaña</Label>
               <Select value={campaignType} onValueChange={setCampaignType}>
                 <SelectTrigger className="mt-3 border-[#E7E5DF] bg-white" data-testid="campaign-type-select">
-                  <SelectValue placeholder="Select campaign type" />
+                  <SelectValue placeholder="Selecciona tipo de campaña" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-[#E7E5DF]">
                   {CAMPAIGN_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
@@ -283,7 +283,7 @@ function App() {
             </div>
 
             <div>
-              <Label className="label-overline">Platforms</Label>
+              <Label className="label-overline">Plataformas</Label>
               <div className="space-y-2 mt-3">
                 {PLATFORMS.map(p => {
                   const Icon = p.icon;
@@ -299,19 +299,19 @@ function App() {
             </div>
 
             <Button onClick={generateCampaign} disabled={!isFormValid || isLoading} className="w-full bg-[#C8553D] hover:bg-[#A64530] text-white disabled:bg-[#E7E5DF] disabled:text-[#57534E]" data-testid="generate-campaign-btn">
-              {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generating...</> : <><Sparkles className="w-5 h-5 mr-2" />Generate Campaign</>}
+              {isLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Generando...</> : <><Sparkles className="w-5 h-5 mr-2" />Generar Campaña</>}
             </Button>
-            {!isFormValid && <p className="text-sm text-[#57534E] text-center">Fill in all fields to generate</p>}
+            {!isFormValid && <p className="text-sm text-[#57534E] text-center">Completa todos los campos para generar</p>}
           </div>
         </aside>
 
         <main className="main-panel md:col-span-8 lg:col-span-9 p-8 md:p-12" data-testid="schedule-panel">
           {error && <div className="error-message flex items-center gap-3 mb-6" data-testid="error-message"><AlertCircle className="w-5 h-5" /><span>{error}</span></div>}
-          {isLoading && <div><h2 className="font-display text-2xl font-bold text-[#1C1917] mb-6">Creating your 7-day schedule...</h2><ScheduleSkeleton /></div>}
+          {isLoading && <div><h2 className="font-display text-2xl font-bold text-[#1C1917] mb-6">Creando tu calendario de 7 días...</h2><ScheduleSkeleton /></div>}
           {!isLoading && campaign?.schedule && (
             <div>
               <div className="mb-8">
-                <h2 className="font-display text-2xl md:text-3xl font-bold text-[#1C1917] mb-2">Your 7-Day Campaign</h2>
+                <h2 className="font-display text-2xl md:text-3xl font-bold text-[#1C1917] mb-2">Tu Campaña de 7 Días</h2>
                 <p className="text-[#57534E]">{campaign.type} · ${campaign.budget} · {campaign.platforms?.join(", ")}</p>
               </div>
               <div className="space-y-6">{campaign.schedule.map((day, i) => <DayCard key={i} day={day} index={i} />)}</div>
@@ -323,30 +323,30 @@ function App() {
 
       <section className="lead-section py-16 md:py-20 px-8" data-testid="lead-capture-section">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1C1917] mb-4">Interested in our classes?</h2>
-          <p className="text-[#57534E] text-lg mb-10">Leave your details and we'll reach out with more information.</p>
-          {leadSuccess && <div className="success-message mb-6" data-testid="lead-success">Thank you! We'll be in touch soon.</div>}
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1C1917] mb-4">¿Te interesan nuestras clases?</h2>
+          <p className="text-[#57534E] text-lg mb-10">Déjanos tus datos y te contactaremos con más información.</p>
+          {leadSuccess && <div className="success-message mb-6" data-testid="lead-success">¡Gracias! Nos pondremos en contacto pronto.</div>}
           <form onSubmit={submitLead} className="space-y-6 text-left">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label className="label-overline">Name</Label>
-                <Input value={leadName} onChange={(e) => setLeadName(e.target.value)} placeholder="Your name" className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-name-input" />
+                <Label className="label-overline">Nombre</Label>
+                <Input value={leadName} onChange={(e) => setLeadName(e.target.value)} placeholder="Tu nombre" className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-name-input" />
               </div>
               <div>
-                <Label className="label-overline">Email</Label>
-                <Input type="email" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} placeholder="your@email.com" className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-email-input" />
+                <Label className="label-overline">Correo Electrónico</Label>
+                <Input type="email" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} placeholder="tu@correo.com" className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-email-input" />
               </div>
             </div>
             <div>
-              <Label className="label-overline">Class Interest</Label>
+              <Label className="label-overline">Clase de Interés</Label>
               <Select value={leadInterest} onValueChange={setLeadInterest}>
-                <SelectTrigger className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-interest-select"><SelectValue placeholder="What interests you?" /></SelectTrigger>
+                <SelectTrigger className="mt-2 border-[#E7E5DF] bg-white" data-testid="lead-interest-select"><SelectValue placeholder="¿Qué te interesa?" /></SelectTrigger>
                 <SelectContent className="bg-white border-[#E7E5DF]">{CAMPAIGN_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="text-center pt-4">
               <Button type="submit" disabled={leadSubmitting} className="px-12 bg-[#C8553D] hover:bg-[#A64530] text-white" data-testid="lead-submit-btn">
-                {leadSubmitting ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Submitting...</> : "Get in Touch"}
+                {leadSubmitting ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Enviando...</> : "Contáctanos"}
               </Button>
             </div>
           </form>
