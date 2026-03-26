@@ -47,7 +47,9 @@ Ver el [checklist de deployment](deployment_checklist.md) para pasos detallados.
 
 - Build command: `npm run build`
 - Output: `build`
-- Variable: `VITE_BACKEND_URL` apuntando al backend
+- Variables:
+  - `REACT_APP_BACKEND_URL` apuntando al backend
+  - `VITE_BACKEND_URL` apuntando al backend
 
 ## Contribución
 
