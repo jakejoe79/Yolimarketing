@@ -28,9 +28,10 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], a
 
 api_key = os.environ.get('OPENAI_API_KEY')
 if not api_key:
-    raise RuntimeError("OPENAI_API_KEY is required for backend startup")
-
-client = AsyncOpenAI(api_key=api_key)
+    print("WARNING: OPENAI_API_KEY not set. API calls will fail.")
+    client = None
+else:
+    client = AsyncOpenAI(api_key=api_key)
 
 class CampaignRequest(BaseModel):
     budget: int
@@ -97,6 +98,9 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
     # Add current message
     messages.append({"role": "user", "content": req.message})
     
+    if client is None:
+        return {"reply": "Error: OPENAI_API_KEY no configurado en el servidor.", "action": "error"}
+    
     try:
         response = await client.chat.completions.create(
             model="gpt-4o",
@@ -155,6 +159,9 @@ IMPORTANTE:
 Devuelve SOLO JSON válido:
 {{"schedule":[{{"day":"Día 1 - Lunes","postTime":"9:00 AM","caption":"Caption cálido y artístico de 150-200 palabras EN ESPAÑOL...","hashtags":["#escueladearte","#creatividad",...8-12 hashtags relevantes]}},...7 días total]}}"""
 
+    if client is None:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurado en el servidor.")
+    
     try:
         response = await client.chat.completions.create(
             model="gpt-4o",
