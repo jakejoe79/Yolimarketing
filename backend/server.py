@@ -16,12 +16,15 @@ app = FastAPI()
 cors_origins = os.environ.get('CORS_ORIGINS', '')
 if cors_origins.strip() == '':
     origins = ["*"]
+    allow_credentials = False
 else:
     origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    allow_credentials = True
     if len(origins) == 0:
         origins = ["*"]
+        allow_credentials = False
 
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"], allow_credentials=allow_credentials)
 
 api_key = os.environ.get('OPENAI_API_KEY')
 if not api_key:
