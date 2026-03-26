@@ -11,10 +11,23 @@ from openai import AsyncOpenAI
 load_dotenv(Path(__file__).parent / '.env')
 
 app = FastAPI()
-origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
 
-client = AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
+# CORS accepted origins
+cors_origins = os.environ.get('CORS_ORIGINS', '')
+if cors_origins.strip() == '':
+    origins = ["*"]
+else:
+    origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    if len(origins) == 0:
+        origins = ["*"]
+
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
+
+api_key = os.environ.get('OPENAI_API_KEY')
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY is required for backend startup")
+
+client = AsyncOpenAI(api_key=api_key)
 
 class CampaignRequest(BaseModel):
     budget: int
@@ -27,6 +40,14 @@ class ChatRequest(BaseModel):
     message: str
     history: List[dict] = []
     campaignContext: Optional[dict] = None
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Yolimarketing backend is running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
