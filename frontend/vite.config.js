@@ -6,18 +6,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, 'src'),
     },
   },
   build: {
     outDir: 'dist',
-    assetsDir: 'assets',
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'src/index.js'),
-      },
-    },
+    emptyOutDir: true
   },
   server: {
     port: 5173,
