@@ -9,6 +9,7 @@
   - [ ] `REDIS_URL=redis://...` (si usas Redis)
   - [ ] `CORS_ORIGINS=https://tu-frontend.vercel.app`
 - [ ] **Frontend (.env.local)**:
+  - [ ] `REACT_APP_BACKEND_URL=https://tu-backend-railway.up.railway.app`
   - [ ] `VITE_BACKEND_URL=https://tu-backend-railway.up.railway.app`
 
 ### 2. Prueba Local Completa

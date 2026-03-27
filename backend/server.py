@@ -11,10 +11,27 @@ from openai import AsyncOpenAI
 load_dotenv(Path(__file__).parent / '.env')
 
 app = FastAPI()
-origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
 
-client = AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
+# CORS accepted origins
+cors_origins = os.environ.get('CORS_ORIGINS', '')
+if cors_origins.strip() == '':
+    origins = ["*"]
+    allow_credentials = False
+else:
+    origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    allow_credentials = True
+    if len(origins) == 0:
+        origins = ["*"]
+        allow_credentials = False
+
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"], allow_credentials=allow_credentials)
+
+api_key = os.environ.get('OPENAI_API_KEY')
+if not api_key:
+    print("WARNING: OPENAI_API_KEY not set. API calls will fail.")
+    client = None
+else:
+    client = AsyncOpenAI(api_key=api_key)
 
 class CampaignRequest(BaseModel):
     budget: int
@@ -27,6 +44,14 @@ class ChatRequest(BaseModel):
     message: str
     history: List[dict] = []
     campaignContext: Optional[dict] = None
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Yolimarketing backend is running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
@@ -72,6 +97,9 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
     
     # Add current message
     messages.append({"role": "user", "content": req.message})
+    
+    if client is None:
+        return {"reply": "Error: OPENAI_API_KEY no configurado en el servidor.", "action": "error"}
     
     try:
         response = await client.chat.completions.create(
@@ -131,6 +159,9 @@ IMPORTANTE:
 Devuelve SOLO JSON válido:
 {{"schedule":[{{"day":"Día 1 - Lunes","postTime":"9:00 AM","caption":"Caption cálido y artístico de 150-200 palabras EN ESPAÑOL...","hashtags":["#escueladearte","#creatividad",...8-12 hashtags relevantes]}},...7 días total]}}"""
 
+    if client is None:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurado en el servidor.")
+    
     try:
         response = await client.chat.completions.create(
             model="gpt-4o",
