@@ -9,6 +9,7 @@ import os
 import json
 import httpx
 from openai import AsyncOpenAI
+from openai.error import APIConnectionError
 
 load_dotenv(Path(__file__).parent / '.env')
 
@@ -43,6 +44,33 @@ else:
 
 openai_model = os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')
 logging.info(f'Using OpenAI model: {openai_model}')
+
+async def send_openai_request(messages, temperature=0.7, max_tokens=400):
+    try:
+        response = await client.chat.completions.create(
+            model=openai_model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=60,
+        )
+        return response
+    except APIConnectionError as e:
+        logging.warning('AsyncOpenAI APIConnectionError, falling back to direct HTTP request: %s', e)
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+        }
+        payload = {
+            'model': openai_model,
+            'messages': messages,
+            'temperature': temperature,
+            'max_tokens': max_tokens,
+        }
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=20.0), trust_env=False) as http_client:
+            resp = await http_client.post('https://api.openai.com/v1/chat/completions', json=payload, headers=headers)
+            resp.raise_for_status()
+            return resp.json()
 
 class CampaignRequest(BaseModel):
     budget: int
@@ -113,14 +141,11 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
         return {"reply": "Error: OPENAI_API_KEY no configurado en el servidor.", "action": "error"}
     
     try:
-        response = await client.chat.completions.create(
-            model=openai_model,
-            messages=messages,
-            temperature=0.7,
-            max_tokens=400,
-            timeout=60,
-        )
-        reply = response.choices[0].message.content.strip()
+        response = await send_openai_request(messages, temperature=0.7, max_tokens=400)
+        if isinstance(response, dict):
+            reply = response['choices'][0]['message']['content'].strip()
+        else:
+            reply = response.choices[0].message.content.strip()
         
         # Check for lead data extraction
         action = "response"
@@ -180,17 +205,18 @@ Devuelve SOLO JSON válido:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurado en el servidor.")
     
     try:
-        response = await client.chat.completions.create(
-            model=openai_model,
-            messages=[
+        response = await send_openai_request(
+            [
                 {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido. Personaliza el contenido basándote en los cursos y eventos disponibles."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.8,
-            timeout=60,
+            max_tokens=1000,
         )
-        
-        text = response.choices[0].message.content.strip()
+        if isinstance(response, dict):
+            text = response['choices'][0]['message']['content'].strip()
+        else:
+            text = response.choices[0].message.content.strip()
         if "```json" in text: text = text.split("```json")[1].split("```")[0]
         elif "```" in text: text = text.split("```")[1].split("```")[0]
         
