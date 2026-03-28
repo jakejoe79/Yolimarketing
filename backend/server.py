@@ -38,7 +38,7 @@ else:
         api_key=api_key,
         timeout=60,
         max_retries=3,
-        http_client=httpx.AsyncClient(timeout=60, trust_env=True),
+        http_client=httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=20.0), trust_env=False),
     )
 
 openai_model = os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')
