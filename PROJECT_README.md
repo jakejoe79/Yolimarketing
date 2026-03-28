@@ -41,7 +41,7 @@ Ver el [checklist de deployment](deployment_checklist.md) para pasos detallados.
 ### Backend (Railway/Heroku)
 
 - Variables de entorno en plataforma
-- Comando: `uvicorn server:app --host 0.0.0.0 --port $PORT`
+- Comando: `uvicorn backend.server:app --host 0.0.0.0 --port $PORT`
 
 ### Frontend (Vercel/Netlify)
 

@@ -44,7 +44,7 @@
 
 ## 7. Configuración de Deployment
 - [x] **Backend (Railway / Heroku / Render)**:
-  - [x] Procfile o comando start correcto: `uvicorn server:app --host 0.0.0.0 --port $PORT`
+  - [x] Procfile o comando start correcto: `uvicorn backend.server:app --host 0.0.0.0 --port $PORT`
   - [ ] Variables de entorno configuradas
   - [ ] DB y Redis conectados
   - [ ] HTTPS habilitado (Railway automático)

@@ -26,7 +26,7 @@
 3. Click "New +" → "Web Service"
 4. Connect repository: `jakejoe79/Yolimarketing`
 5. Set build command: `pip install -r requirements.txt`
-6. Set start command: `uvicorn server:app --host 0.0.0.0 --port $PORT`
+6. Set start command: `uvicorn backend.server:app --host 0.0.0.0 --port $PORT`
 7. Add environment variables:
    - `OPENAI_API_KEY`: Your OpenAI API key
    - `CORS_ORIGINS`: Your frontend URL
