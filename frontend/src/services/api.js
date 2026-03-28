@@ -1,7 +1,6 @@
 const BASE_URL =
   process.env.REACT_APP_BACKEND_URL ||
   process.env.VITE_BACKEND_URL ||
-  (typeof import !== 'undefined' && import.meta && import.meta.env ? import.meta.env.VITE_BACKEND_URL : undefined) ||
   "https://yolimarketing-backend.onrender.com";
 
 export async function apiFetch(path, options = {}) {
