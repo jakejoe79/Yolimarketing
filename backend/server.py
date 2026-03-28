@@ -8,8 +8,8 @@ import logging
 import os
 import json
 import httpx
+import openai
 from openai import AsyncOpenAI
-from openai.error import APIConnectionError
 
 load_dotenv(Path(__file__).parent / '.env')
 
@@ -55,7 +55,7 @@ async def send_openai_request(messages, temperature=0.7, max_tokens=400):
             timeout=60,
         )
         return response
-    except APIConnectionError as e:
+    except openai.APIConnectionError as e:
         logging.warning('AsyncOpenAI APIConnectionError, falling back to direct HTTP request: %s', e)
         headers = {
             'Authorization': f'Bearer {api_key}',
