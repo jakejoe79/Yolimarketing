@@ -4,12 +4,14 @@ from pydantic import BaseModel
 from typing import List, Optional
 from dotenv import load_dotenv
 from pathlib import Path
+import logging
 import os
 import json
 from openai import AsyncOpenAI
 
 load_dotenv(Path(__file__).parent / '.env')
 
+logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 # CORS accepted origins
@@ -32,6 +34,9 @@ if not api_key:
     client = None
 else:
     client = AsyncOpenAI(api_key=api_key)
+
+openai_model = os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')
+logging.info(f'Using OpenAI model: {openai_model}')
 
 class CampaignRequest(BaseModel):
     budget: int
@@ -103,7 +108,7 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
     
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o",
+            model=openai_model,
             messages=messages,
             temperature=0.7,
             max_tokens=400
@@ -125,7 +130,12 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
         
         return {"reply": reply, "action": action, "leadData": lead_data}
     except Exception as e:
-        return {"reply": "Lo siento, hubo un error. Por favor intenta de nuevo.", "action": "error"}
+        logging.exception('Chat request failed')
+        return {
+            "reply": "Lo siento, hubo un error. Por favor intenta de nuevo.",
+            "action": "error",
+            "error": str(e)
+        }
 
 @app.post("/api/generate-campaign")
 async def generate_campaign(req: CampaignRequest):
@@ -164,7 +174,7 @@ Devuelve SOLO JSON válido:
     
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o",
+            model=openai_model,
             messages=[
                 {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido. Personaliza el contenido basándote en los cursos y eventos disponibles."},
                 {"role": "user", "content": prompt}
@@ -179,4 +189,5 @@ Devuelve SOLO JSON válido:
         data = json.loads(text.strip())
         return {"schedule": data["schedule"], "type": req.campaignType, "budget": req.budget, "platforms": req.platforms, "dateRange": req.dateRange}
     except Exception as e:
+        logging.exception('Campaign generation request failed')
         raise HTTPException(status_code=500, detail=str(e))
