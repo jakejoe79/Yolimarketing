@@ -7,9 +7,8 @@ from pathlib import Path
 import logging
 import os
 import json
-import httpx
-import openai
-from openai import AsyncOpenAI
+import random
+import re
 
 load_dotenv(Path(__file__).parent / '.env')
 
@@ -30,47 +29,52 @@ else:
 
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"], allow_credentials=allow_credentials)
 
-api_key = os.environ.get('OPENAI_API_KEY')
-if not api_key:
-    print("WARNING: OPENAI_API_KEY not set. API calls will fail.")
-    client = None
-else:
-    client = AsyncOpenAI(
-        api_key=api_key,
-        timeout=60,
-        max_retries=3,
-        http_client=httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=20.0), trust_env=False),
-    )
 
-openai_model = os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')
-logging.info(f'Using OpenAI model: {openai_model}')
+def fake_ai_response(message, history=None, campaign_context=None):
+    message_lower = message.lower()
+    
+    # Extract courses from campaign context
+    courses = campaign_context.get("courses", []) if campaign_context else []
+    
+    # Intent detection (basic but effective)
+    if "precio" in message_lower or "cuesta" in message_lower:
+        return "Nuestras clases varían entre $300 y $800 MXN dependiendo del tipo. ¿Te gustaría una recomendación?"
+    
+    if "clase" in message_lower:
+        if courses:
+            course = courses[0]
+            return f"Te recomiendo nuestro curso '{course.get('title', 'Sin título')}'. Es perfecto para empezar 🎨"
+        return "Tenemos clases de pintura, dibujo y talleres creativos. ¿Quieres una clase de prueba gratis?"
+    
+    if "horario" in message_lower or "cuando" in message_lower:
+        return "Tenemos horarios entre semana y fines de semana. ¿Qué días te interesan?"
+    
+    if "hola" in message_lower:
+        return "¡Hola! 🎨 Me encanta que estés aquí. ¿Buscas clases o eventos?"
+    
+    if "correo" in message_lower or "email" in message_lower:
+        return "Perfecto, ya guardé tu información. Te contactaremos pronto para agendar tu clase."
+    
+    # fallback
+    responses = [
+        "¡Qué buena pregunta! Déjame ayudarte con eso 😊",
+        "Claro, te explico. Tenemos varias opciones dependiendo de lo que buscas.",
+        "Eso suena genial, creo que te va a encantar nuestra escuela 🎨",
+    ]
+    return random.choice(responses)
 
-async def send_openai_request(messages, temperature=0.7, max_tokens=400):
-    try:
-        response = await client.chat.completions.create(
-            model=openai_model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            timeout=60,
-        )
-        return response
-    except openai.APIConnectionError as e:
-        logging.warning('AsyncOpenAI APIConnectionError, falling back to direct HTTP request: %s', e)
-        headers = {
-            'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json',
+
+def extract_lead(message):
+    email_match = re.search(r"\S+@\S+\.\S+", message)
+    name_match = re.search(r"me llamo (\w+)", message.lower())
+    
+    if email_match:
+        return {
+            "name": name_match.group(1).capitalize() if name_match else "Cliente",
+            "email": email_match.group(0)
         }
-        payload = {
-            'model': openai_model,
-            'messages': messages,
-            'temperature': temperature,
-            'max_tokens': max_tokens,
-        }
-        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=20.0), trust_env=False) as http_client:
-            resp = await http_client.post('https://api.openai.com/v1/chat/completions', json=payload, headers=headers)
-            resp.raise_for_status()
-            return resp.json()
+    return None
+
 
 class CampaignRequest(BaseModel):
     budget: int
@@ -84,6 +88,7 @@ class ChatRequest(BaseModel):
     history: List[dict] = []
     campaignContext: Optional[dict] = None
 
+
 @app.get("/")
 async def root():
     return {"status": "ok", "message": "Yolimarketing backend is running"}
@@ -92,82 +97,24 @@ async def root():
 async def health():
     return {"status": "ok"}
 
+
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
-    # Build campaign context string if available
-    campaign_info = ""
-    if req.campaignContext:
-        campaign_info = f"""
-Contexto de campaña activa:
-- Tipo: {req.campaignContext.get('type', 'N/A')}
-- Presupuesto: ${req.campaignContext.get('budget', 'N/A')}
-- Plataformas: {', '.join(req.campaignContext.get('platforms', []))}
-"""
-
-    system_prompt = f"""Eres un asistente amable y entusiasta para una escuela de arte en español.
-Tu rol es ayudar a los visitantes con información sobre clases, talleres y programas.
-
-INSTRUCCIONES:
-1. Responde SIEMPRE en español, de forma cálida y entusiasta.
-2. Si el usuario menciona su nombre, correo o interés en una clase específica, extrae esa información.
-3. Si preguntan por precios o horarios específicos, invítalos a dejar sus datos.
-4. Menciona nuestras clases: Taller de Fin de Semana, Clase de Prueba Gratis, Intensivo de Temporada, Estudio Abierto.
-
-{campaign_info}
-
-EXTRACCIÓN DE LEADS:
-Si el usuario proporciona información de contacto (nombre Y correo), responde con un JSON especial al FINAL de tu mensaje en este formato exacto:
-[LEAD_DATA]{{"name": "nombre", "email": "correo@ejemplo.com", "interest": "clase de interés"}}[/LEAD_DATA]
-
-Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
-
-    messages = [{"role": "system", "content": system_prompt}]
+    message = req.message
+    history = req.history
+    campaign_context = req.campaignContext
     
-    # Add history (handle both old and new format)
-    for msg in req.history[-10:]:
-        if msg.get("role") == "user":
-            messages.append({"role": "user", "content": msg.get("message", msg.get("text", ""))})
-        elif msg.get("role") == "ai":
-            messages.append({"role": "assistant", "content": msg.get("message", msg.get("text", ""))})
-        elif msg.get("sender") == "user":
-            messages.append({"role": "user", "content": msg.get("text", msg.get("message", ""))})
-        else:
-            messages.append({"role": "assistant", "content": msg.get("text", msg.get("message", ""))})
+    reply = fake_ai_response(message, history, campaign_context)
     
-    # Add current message
-    messages.append({"role": "user", "content": req.message})
+    # Check for lead extraction
+    lead = extract_lead(message)
     
-    if client is None:
-        return {"reply": "Error: OPENAI_API_KEY no configurado en el servidor.", "action": "error"}
-    
-    try:
-        response = await send_openai_request(messages, temperature=0.7, max_tokens=400)
-        if isinstance(response, dict):
-            reply = response['choices'][0]['message']['content'].strip()
-        else:
-            reply = response.choices[0].message.content.strip()
-        
-        # Check for lead data extraction
-        action = "response"
-        lead_data = None
-        
-        if "[LEAD_DATA]" in reply and "[/LEAD_DATA]" in reply:
-            try:
-                lead_json = reply.split("[LEAD_DATA]")[1].split("[/LEAD_DATA]")[0]
-                lead_data = json.loads(lead_json)
-                reply = reply.split("[LEAD_DATA]")[0].strip()
-                action = "collect_lead"
-            except:
-                pass
-        
-        return {"reply": reply, "action": action, "leadData": lead_data}
-    except Exception as e:
-        logging.exception('Chat request failed')
-        return {
-            "reply": "Lo siento, hubo un error. Por favor intenta de nuevo.",
-            "action": "error",
-            "error": f"{type(e).__name__}: {e}"
-        }
+    return {
+        "reply": reply,
+        "action": "collect_lead" if lead else "general",
+        "leadData": lead
+    }
+
 
 @app.post("/api/generate-campaign")
 async def generate_campaign(req: CampaignRequest):
@@ -179,12 +126,12 @@ async def generate_campaign(req: CampaignRequest):
         
         if courses:
             context_info += "\n\nCURSOS DISPONIBLES:\n"
-            for c in courses[:5]:  # Limit to 5
+            for c in courses[:5]:
                 context_info += f"- {c.get('title', 'Sin título')}: {c.get('description', '')} (${c.get('price', 'N/A')})\n"
         
         if events:
             context_info += "\nEVENTOS PRÓXIMOS:\n"
-            for e in events[:5]:  # Limit to 5
+            for e in events[:5]:
                 date_str = e.get('date', '')
                 context_info += f"- {e.get('title', 'Sin título')}: {e.get('description', '')} ({date_str})\n"
 
@@ -201,27 +148,30 @@ IMPORTANTE:
 Devuelve SOLO JSON válido:
 {{"schedule":[{{"day":"Día 1 - Lunes","postTime":"9:00 AM","caption":"Caption cálido y artístico de 150-200 palabras EN ESPAÑOL...","hashtags":["#escueladearte","#creatividad",...8-12 hashtags relevantes]}},...7 días total]}}"""
 
-    if client is None:
-        raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurado en el servidor.")
-    
     try:
-        response = await send_openai_request(
-            [
-                {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido. Personaliza el contenido basándote en los cursos y eventos disponibles."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.8,
-            max_tokens=1000,
-        )
-        if isinstance(response, dict):
-            text = response['choices'][0]['message']['content'].strip()
-        else:
-            text = response.choices[0].message.content.strip()
-        if "```json" in text: text = text.split("```json")[1].split("```")[0]
-        elif "```" in text: text = text.split("```")[1].split("```")[0]
+        # Simulated campaign generation (no OpenAI needed)
+        schedule = []
+        days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        times = ["9:00 AM", "11:00 AM", "2:00 PM", "6:00 PM", "8:00 PM"]
         
-        data = json.loads(text.strip())
-        return {"schedule": data["schedule"], "type": req.campaignType, "budget": req.budget, "platforms": req.platforms, "dateRange": req.dateRange}
+        for i in range(7):
+            course = req.campaignContext.get("courses", [{}])[0] if req.campaignContext else {}
+            course_title = course.get("title", "Clase de Arte") if course else "Clase de Arte"
+            
+            schedule.append({
+                "day": f"Día {i+1} - {days[i]}",
+                "postTime": times[i % len(times)],
+                "caption": f"Hola a todos! Hoy es un día perfecto para explorar tu creatividad. Nuestro curso '{course_title}' está disponible ahora. ¡Únete a nuestra comunidad artística! 🎨✨ #escueladearte #creatividad #arte #pintura #taller",
+                "hashtags": ["#escueladearte", "#creatividad", "#arte", "#pintura", "#taller", "#aprende", "#artistamexico", "#cultura"]
+            })
+        
+        return {
+            "schedule": schedule,
+            "type": req.campaignType,
+            "budget": req.budget,
+            "platforms": req.platforms,
+            "dateRange": req.dateRange
+        }
     except Exception as e:
         logging.exception('Campaign generation request failed')
         raise HTTPException(status_code=500, detail=str(e))
