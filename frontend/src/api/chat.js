@@ -1,4 +1,8 @@
-const API_URL = process.env.REACT_APP_BACKEND_URL || process.env.VITE_BACKEND_URL || "http://127.0.0.1:8001";
+const API_URL =
+  process.env.REACT_APP_BACKEND_URL ||
+  (typeof import !== 'undefined' && import.meta && import.meta.env ? import.meta.env.VITE_BACKEND_URL : undefined) ||
+  process.env.VITE_BACKEND_URL ||
+  "https://yolimarketing-backend.onrender.com";
 
 export async function sendMessage(userInput, history = []) {
   try {
