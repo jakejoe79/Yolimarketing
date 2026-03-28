@@ -7,6 +7,7 @@ from pathlib import Path
 import logging
 import os
 import json
+import httpx
 from openai import AsyncOpenAI
 
 load_dotenv(Path(__file__).parent / '.env')
@@ -33,7 +34,12 @@ if not api_key:
     print("WARNING: OPENAI_API_KEY not set. API calls will fail.")
     client = None
 else:
-    client = AsyncOpenAI(api_key=api_key)
+    client = AsyncOpenAI(
+        api_key=api_key,
+        timeout=60,
+        max_retries=3,
+        http_client=httpx.AsyncClient(timeout=60, trust_env=True),
+    )
 
 openai_model = os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')
 logging.info(f'Using OpenAI model: {openai_model}')
@@ -111,7 +117,8 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
             model=openai_model,
             messages=messages,
             temperature=0.7,
-            max_tokens=400
+            max_tokens=400,
+            timeout=60,
         )
         reply = response.choices[0].message.content.strip()
         
@@ -134,7 +141,7 @@ Solo incluye LEAD_DATA si tienes TANTO nombre como correo válido."""
         return {
             "reply": "Lo siento, hubo un error. Por favor intenta de nuevo.",
             "action": "error",
-            "error": str(e)
+            "error": f"{type(e).__name__}: {e}"
         }
 
 @app.post("/api/generate-campaign")
@@ -179,7 +186,8 @@ Devuelve SOLO JSON válido:
                 {"role": "system", "content": "Eres un experto en marketing de redes sociales para escuelas de arte. Responde SOLO en español. Devuelve solo JSON válido. Personaliza el contenido basándote en los cursos y eventos disponibles."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.8
+            temperature=0.8,
+            timeout=60,
         )
         
         text = response.choices[0].message.content.strip()
