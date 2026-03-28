@@ -3,8 +3,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "uvicorn backend/server:app --host 0.0.0.0 --port $PORT",
-    "healthcheckPath": "/docs",
+    "startCommand": "uvicorn backend.server:app --host 0.0.0.0 --port $PORT",
+    "healthcheckPath": "/health",
     "healthcheckInterval": "30s"
   }
 }
